@@ -41,8 +41,6 @@ def load_clip_to_cpu(backbone_name):
     
     return model
 
-
-
 class TopKDataset(Dataset):
     def __init__(self, data, top_k_idxs, top_k_conf, top_k_pseudo):
         self.data = data
@@ -564,9 +562,10 @@ class ALP(TrainerX):
         self.model.taal.eval()
         with torch.no_grad():
             for i, batch in enumerate(self.test_loader):
+                # input, label = torch.stack(batch['img']).to(self.device), batch['ground_labels'].to(self.device)
                 input, label = self.parse_batch_train(batch)
-                output = self.model.taal(input)
-                _, predicted = torch.max(output.data, 1)
+                output = self.model.forward_taal(input[0])
+                _, predicted = torch.max(output, 1)
                 total += label.size(0)
                 correct += (predicted == label).sum().item()
         if self._writer:
